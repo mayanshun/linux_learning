@@ -1,0 +1,62 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: prometheus-blackbox-exporter-tcp
+  namespace: monitoring
+spec:
+  endpoints:
+  - params:
+      # 监控使用的module，这里就是我们blackbox.yml中配置的监控规则
+      module:
+        - tcp_connect
+    path: /probe
+    # 此处路径固定，为blackbox-exporter暴露的监控页面
+    port: http
+    # 监控使用的端口（可以是service端口的名称）
+    relabelings:
+    # 正则替换这里主要是为了实现自定义监控路径和地址
+    # 整体这段替换的目的就是为了将默认的目标地址替换为我们真正需要监控的地址和路径
+    - action: replace
+      # 替换内容
+      regex: (.*)
+      # 替换规则
+      replacement: ${1}
+      # 分隔符
+      #separator: / 
+      # 替换的内容
+      # 这里使用了两个内置变量
+      sourceLabels:
+      # 地址（需要监控的svc的地址）
+      - __address__
+      # 被替换内容
+      targetLabel: __param_target
+    # 这段替换的目的是为了将默认访问地址换成我们blackbox_exporter的地址
+    - action: replace
+      regex: (.*)
+      # blackbox-exporter的svc地址
+      # 为了实现跨namespace访问，地址需要写成{SERVICE_NAME}.{NAMESPACE_NAME}.svc.cluster.local 
+      replacement: pro-blackbox-prometheus-blackbox-exporter.monitoring.svc.cluster.local:9115
+      sourceLabels:
+      - __address__
+      targetLabel: __address__
+    # 添加label方便后续进行辨认
+    - action: replace
+      regex: (.*)
+      replacement: $1
+      sourceLabels:
+      - __param_target
+      targetLabel: instance
+    # 添加label方便后续进行辨认
+    - action: replace
+      regex: (.*)
+      replacement: $1
+      sourceLabels:
+      - __param_module
+      targetLabel: module
+  # 命名空间限制
+  namespaceSelector:
+    # 允许所有命名空间
+    any: true
+  selector:
+    matchLabels:
+      blackbox-monitor: "true"

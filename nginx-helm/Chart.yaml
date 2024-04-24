@@ -1,0 +1,7 @@
+apiVersion: v1
+appVersion: v2.2
+description: first helm
+keywords:
+- nginx-helm
+name: nginx-helm
+version: v1.0.0

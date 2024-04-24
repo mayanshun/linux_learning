@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deployname }}
+  labels:
+    app: helm-nginx
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: helm-nginx
+  template:
+    metadata:
+      labels:
+        app: helm-nginx
+    spec:
+      containers:
+      - name: helm-nginx
+        image: {{ .Values.images.repository }}
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 80

@@ -1,0 +1,5 @@
+deployname: helm-nginx
+replicaCount: 2
+images:
+  repository: nginx:1.24
+  tag: v1

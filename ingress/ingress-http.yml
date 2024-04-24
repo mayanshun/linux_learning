@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-http
+  namespace: dev
+spec:
+  # 这个很关键，如果写错会导致访问404
+  ingressClassName: nginx
+  rules:
+    - host: nginx.lc.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-service
+                port:
+                  number: 80
+    - host: tomcat.lc.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: tomcat-service
+                port:
+                  number: 8080
